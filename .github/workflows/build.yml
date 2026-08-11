@@ -1,0 +1,39 @@
+name: Compilation PlatformIO
+
+on:
+  push:
+    branches: ["main", "develop"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Recuperer le depot
+        uses: actions/checkout@v6
+
+      - name: Mettre en cache PlatformIO
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.platformio/.cache
+          key: ${{ runner.os }}-pio-${{ hashFiles('platformio.ini') }}
+          restore-keys: |
+            ${{ runner.os }}-pio-
+
+      - name: Installer Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Installer PlatformIO
+        run: pip install --upgrade platformio
+
+      - name: Creer les secrets de compilation
+        run: cp include/Secrets.exemple.h include/Secrets.h
+
+      - name: Compiler le firmware
+        run: pio run -e trmnl_diy_kit
