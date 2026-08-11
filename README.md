@@ -1,4 +1,5 @@
-# E-Ink Dashboard
+<div align="center">
+# E-Ink Display
 
 ### Dashboard E-Ink 7,5" autonome sur TRMNL DIY Kit / XIAO ESP32-S3 Plus
 
@@ -6,8 +7,8 @@ Firmware **C++ / PlatformIO** entièrement personnalisé pour transformer le
 [TRMNL 7.5" (OG) DIY Kit](https://wiki.seeedstudio.com/trmnl_7inch5_diy_kit_main_page/)
 en tableau de bord E-Ink de bureau : heure, date, météo, batterie et futures pages interactives.
 
-[![Compilation PlatformIO](https://github.com/ThomasHni/E-Ink-Dashboard/actions/workflows/build.yml/badge.svg)](https://github.com/ThomasHni/E-Ink-Dashboard/actions/workflows/build.yml)
-[![clang-format](https://github.com/ThomasHni/E-Ink-Dashboard/actions/workflows/clang-format.yml/badge.svg)](https://github.com/ThomasHni/E-Ink-Dashboard/actions/workflows/clang-format.yml)
+[![Compilation PlatformIO](https://github.com/ThomasHni/E-Ink-Display/actions/workflows/build.yml/badge.svg)](https://github.com/ThomasHni/E-Ink-Dipslay/actions/workflows/build.yml)
+[![clang-format](https://github.com/ThomasHni/E-Ink-Display/actions/workflows/clang-format.yml/badge.svg)](https://github.com/ThomasHni/E-Ink-Display/actions/workflows/clang-format.yml)
 [![Version](https://img.shields.io/badge/version-v1.0.0-2f363d)](#roadmap)
 [![C++](https://img.shields.io/badge/C%2B%2B-firmware-00599C?logo=cplusplus&logoColor=white)](https://en.cppreference.com/)
 [![PlatformIO](https://img.shields.io/badge/PlatformIO-project-F5822A?logo=platformio&logoColor=white)](https://platformio.org/)
@@ -53,7 +54,7 @@ La **V1.0.0** affiche une page d'accueil monochrome optimisée pour l'E-Ink avec
 ---
 
 ## Sommaire
-- [E-Ink Dashboard](#e-ink-dashboard)
+- [E-Ink Display](#e-ink-display)
     - [Dashboard E-Ink 7,5" autonome sur TRMNL DIY Kit / XIAO ESP32-S3 Plus](#dashboard-e-ink-75-autonome-sur-trmnl-diy-kit--xiao-esp32-s3-plus)
   - [Aperçu](#aperçu)
   - [Sommaire](#sommaire)
