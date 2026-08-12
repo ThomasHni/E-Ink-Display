@@ -23,6 +23,6 @@ constexpr char URL_METEO[] = "https://api.open-meteo.com/v1/forecast";
 
 constexpr uint32_t DELAI_ACTUALISATION_METEO_MS = 30UL * 60UL * 1000UL;
 
-constexpr char VERSION_APPLICATION[] = "V1.0.0";
+constexpr char VERSION_APPLICATION[] = "V1.1.0";
 
 #endif

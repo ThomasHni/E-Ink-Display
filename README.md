@@ -8,9 +8,9 @@ Firmware **C++ / PlatformIO** entièrement personnalisé pour transformer le
 [TRMNL 7.5" (OG) DIY Kit](https://wiki.seeedstudio.com/trmnl_7inch5_diy_kit_main_page/)
 en tableau de bord E-Ink de bureau : heure, date, météo, batterie et futures pages interactives.
 
-[![Compilation PlatformIO](https://github.com/ThomasHni/E-Ink-Display/actions/workflows/build.yml/badge.svg)](https://github.com/ThomasHni/E-Ink-Dipslay/actions/workflows/build.yml)
+[![Compilation PlatformIO](https://github.com/ThomasHni/E-Ink-Display/actions/workflows/build.yml/badge.svg)](https://github.com/ThomasHni/E-Ink-Display/actions/workflows/build.yml)
 [![clang-format](https://github.com/ThomasHni/E-Ink-Display/actions/workflows/clang-format.yml/badge.svg)](https://github.com/ThomasHni/E-Ink-Display/actions/workflows/clang-format.yml)
-[![Version](https://img.shields.io/badge/version-v1.0.0-2f363d)](#roadmap)
+[![Version](https://img.shields.io/badge/version-v1.1.0-2f363d)](#roadmap)
 [![C++](https://img.shields.io/badge/C%2B%2B-firmware-00599C?logo=cplusplus&logoColor=white)](https://en.cppreference.com/)
 [![PlatformIO](https://img.shields.io/badge/PlatformIO-project-F5822A?logo=platformio&logoColor=white)](https://platformio.org/)
 [![Arduino](https://img.shields.io/badge/framework-Arduino-00878F?logo=arduino&logoColor=white)](https://docs.espressif.com/projects/arduino-esp32/)
@@ -38,19 +38,20 @@ en tableau de bord E-Ink de bureau : heure, date, météo, batterie et futures p
        width="900">
 </p>
 
-La **V1.0.0** affiche une page d'accueil monochrome optimisée pour l'E-Ink avec :
+La **V1.1.0** affiche une page d'accueil monochrome optimisée pour l'E-Ink avec :
 
 - la **date** et l'**heure locale** synchronisées par NTP ;
 - la **météo actuelle** récupérée depuis [Open-Meteo](https://open-meteo.com/en/docs) ;
 - la température actuelle et les **minimum / maximum journaliers** ;
 - une condition météo traduite en français à partir des codes WMO ;
 - des **pictogrammes météo dessinés directement avec LVGL** ;
+- des **variantes jour / nuit** des pictogrammes grâce à l'indicateur `is_day` d'Open-Meteo ;
 - une estimation du **niveau de batterie** à partir de l'ADC de l'EE04 ;
 - la version du firmware ;
 - une architecture C++ modulaire préparée pour les futures pages.
 
 > [!NOTE]
-> Dans la V1, la météo est récupérée au démarrage. L'heure continue ensuite d'évoluer localement et l'écran est rafraîchi à chaque changement de minute. La stratégie de rafraîchissement et le deep sleep seront optimisés dans une version ultérieure.
+> Depuis la V1.1.0, les données météo sont actualisées périodiquement afin de maintenir les informations et les pictogrammes jour / nuit à jour. L'optimisation du rafraîchissement E-Ink et le deep sleep restent prévus pour une version ultérieure.
 
 ---
 
@@ -63,6 +64,7 @@ La **V1.0.0** affiche une page d'accueil monochrome optimisée pour l'E-Ink avec
     - [Principes de conception](#principes-de-conception)
   - [Fonctionnalités](#fonctionnalités)
     - [V1.0.0](#v100)
+    - [V1.1.0](#v110)
     - [Limites actuelles](#limites-actuelles)
   - [Démarrage rapide](#démarrage-rapide)
     - [Prérequis](#prérequis)
@@ -102,7 +104,7 @@ La **V1.0.0** affiche une page d'accueil monochrome optimisée pour l'E-Ink avec
     - [GitHub Actions](#github-actions)
   - [Roadmap](#roadmap)
     - [v1.0.0 — Dashboard principal](#v100--dashboard-principal)
-    - [v1.1 — Bonus / finition](#v11--bonus--finition)
+    - [v1.1.0 — Gestion jour / nuit + preparation V2](#v110--gestion-jour--nuit--preparation-v2)
     - [v2 — Navigation et nouvelles pages](#v2--navigation-et-nouvelles-pages)
   - [Dépannage](#dépannage)
   - [Sécurité](#sécurité)
@@ -172,9 +174,20 @@ Internet
 | Mise à jour de l'heure | [x] | détection du changement de minute |
 | Interface E-Ink | [x] | LVGL + `e1001_display` + Seeed_GFX |
 
+### V1.1.0
+
+| Fonction | État | Implémentation |
+| :--- | :---: | :--- |
+| Détection jour / nuit | [x] | `is_day` via Open-Meteo |
+| Icône ciel dégagé de jour | [x] | soleil dessiné avec LVGL |
+| Icône ciel dégagé de nuit | [x] | lune dessinée avec LVGL |
+| Variantes météo jour / nuit | [x] | `IconeMeteo` selon le code WMO et `is_day` |
+| Version firmware | [x] | affichage `v1.1.0` |
+| Actualisation périodique de la météo | [x] | récupération automatique à intervalle régulier |
+| Orchestration applicative | [x] | classe `Application` dédiée |
+
 ### Limites actuelles
 
-- la météo n'est pas encore rechargée périodiquement ;
 - le pourcentage de batterie reste une estimation basée sur la tension ;
 - une seule page est disponible ;
 - les trois boutons utilisateur ne pilotent pas encore la navigation ;
@@ -200,8 +213,8 @@ Côté matériel, le projet cible le [TRMNL 7.5" (OG) DIY Kit](https://wiki.seee
 ### 1. Cloner le dépôt
 
 ```bash
-git clone https://github.com/ThomasHni/E-Ink-Dashboard.git
-cd E-Ink-Dashboard
+git clone https://github.com/ThomasHni/E-Ink-Display.git
+cd E-Ink-Display
 ```
 
 ### 2. Créer le fichier de secrets
@@ -441,30 +454,45 @@ Le firmware sépare la logique métier, les services réseau, l'interface LVGL e
 
 ```mermaid
 flowchart LR
+    MAIN[main.cpp]
+    APP[Application]
+
     NTP[Serveur NTP]
     API[Open-Meteo]
     WIFI[Wi-Fi]
+
     RESEAU[Reseau]
     HORLOGE[Horloge]
     CLIENT[ClientMeteo]
     DATA[DonneesMeteo]
     BAT[Batterie]
+
     ACCUEIL[Accueil]
     ICONE[IconeMeteo]
+
     LVGL[LVGL 9.5]
     DRIVER[e1001_display]
     GFX[Seeed_GFX]
     EINK[E-Ink 7,5"\n800 × 480]
 
+    MAIN --> APP
+
     NTP --> WIFI
     API --> WIFI
     WIFI --> RESEAU
+
+    APP --> RESEAU
+    APP --> HORLOGE
+    APP --> CLIENT
+    APP --> BAT
+    APP --> ACCUEIL
+
     RESEAU --> HORLOGE
     RESEAU --> CLIENT
+
     CLIENT --> DATA
-    DATA --> ACCUEIL
-    HORLOGE --> ACCUEIL
-    BAT --> ACCUEIL
+    DATA --> APP
+
     ICONE --> ACCUEIL
     ACCUEIL --> LVGL
     LVGL --> DRIVER
@@ -486,25 +514,29 @@ flowchart LR
 | [`e1001_display`](lib/e1001_display/e1001_display.h) | adaptation entre LVGL et le matériel E-Paper |
 | [`driver.h`](lib/driver/driver.h) | sélection de la combinaison carte / écran Seeed |
 | [`lv_conf.h`](lib/lvgl_conf/lv_conf.h) | configuration LVGL et polices intégrées |
+| [`Application`](lib/application/Application.h) | orchestration générale du firmware, initialisation et actualisations périodiques |
 
 ---
 
 ## Organisation du dépôt
 
 ```text
-E-Ink-Dashboard/
+E-Ink-Display/
 ├── .github/
 │   └── workflows/
 │       ├── build.yml
 │       └── clang-format.yml
 ├── docs/
 │   └── images/
-│       └── dashboard-v1.jpg
+│       └── Display-v1.jpg
 ├── include/
 │   ├── Configuration.h
 │   ├── Secrets.exemple.h
 │   └── Secrets.h              # local uniquement, ignoré par Git
 ├── lib/
+│   ├── application/
+│   │   ├── Application.cpp
+│   │   └── Application.h
 │   ├── accueil/
 │   │   ├── Accueil.cpp
 │   │   └── Accueil.h
@@ -691,12 +723,13 @@ sequenceDiagram
 
 ### Données météo
 
-Le client demande à [Open-Meteo](https://open-meteo.com/en/docs) uniquement les données nécessaires à la V1 :
+Le client demande à [Open-Meteo](https://open-meteo.com/en/docs) uniquement les données nécessaires au dashboard :
 
 ```text
 current
 ├── temperature_2m
-└── weather_code
+├── weather_code
+└── is_day
 
 daily
 ├── temperature_2m_min
@@ -712,13 +745,11 @@ Le [`main.cpp`](src/main.cpp) reste volontairement réduit à l'orchestration :
 ```cpp
 void loop()
 {
-    lv_timer_handler();
-    actualiserHorloge();
-    delay(DELAI_BOUCLE_MS);
+    application.executer();
 }
 ```
 
-Lorsque la minute change, la page d'accueil est actualisée puis envoyée à l'écran E-Ink.
+Depuis la V1.1.0, `main.cpp` délègue l'orchestration à la classe `Application`. Cette séparation prépare l'arrivée de la navigation et des futures pages de la V2.
 
 ---
 
@@ -793,13 +824,15 @@ Pour un projet PlatformIO natif, la [documentation PlatformIO sur GitHub Actions
 - [x] interface principale moderne
 - [x] version firmware
 
-### v1.1 — Bonus / finition
+### v1.1.0 — Gestion jour / nuit + preparation V2
 
-- [ ] citation du jour ;
-- [ ] actualisation périodique de la météo ;
-- [ ] courbe tension → pourcentage batterie plus réaliste ;
-- [ ] meilleure stratégie de rafraîchissement E-Ink ;
-- [ ] journalisation série structurée.
+- [x] récupération de `is_day` depuis Open-Meteo ;
+- [x] distinction jour / nuit ;
+- [x] pictogramme soleil en journée ;
+- [x] pictogramme lune pendant la nuit ;
+- [x] variantes météo adaptées au cycle jour / nuit.
+- [x] création de `Application` pour centraliser l'orchestration ;
+- [x] allègement de `main.cpp` ;
 
 ### v2 — Navigation et nouvelles pages
 
@@ -976,7 +1009,7 @@ Les liens essentiels sont intégrés directement dans les sections correspondant
 
 <div align="center">
 
-**E-Ink Dashboard · v1.0.0**  
+**E-Ink Display · v1.1.0**  
 TRMNL 7.5" DIY Kit · XIAO ESP32-S3 Plus · PlatformIO · LVGL · Open-Meteo
 
 </div>
