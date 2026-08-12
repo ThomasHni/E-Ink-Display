@@ -15,6 +15,8 @@ class ClientMeteo
   private:
     static constexpr unsigned int PRECISION_COORDONNEES = 4;
 
+    static constexpr uint8_t INDICATEUR_JOUR = 1;
+
     static constexpr uint8_t CODE_CIEL_DEGAGE       = 0;
     static constexpr uint8_t CODE_NUAGEUX_MAX       = 3;
     static constexpr uint8_t CODE_BROUILLARD_MAX    = 48;
@@ -28,7 +30,6 @@ class ClientMeteo
     String convertirCondition(uint8_t code) const;
 
     bool effectuerRequete(String& reponse);
-
     bool analyserReponse(const String& reponse, DonneesMeteo& donnees);
 };
 

@@ -6,7 +6,7 @@
 
 enum class TypeIconeMeteo
 {
-    Soleil,
+    Degage,
     PartiellementNuageux,
     Nuageux,
     Brouillard,
@@ -21,13 +21,13 @@ class IconeMeteo
     IconeMeteo();
 
     void creer(lv_obj_t* parent);
-    void actualiser(uint8_t codeMeteo);
+    void actualiser(uint8_t codeMeteo, bool estJour);
 
   private:
-    static constexpr int16_t LARGEUR = 150;
-    static constexpr int16_t HAUTEUR = 130;
+    static constexpr int16_t LARGEUR = 170;
+    static constexpr int16_t HAUTEUR = 140;
 
-    static constexpr int16_t DECALAGE_X = 145;
+    static constexpr int16_t DECALAGE_X = 350;
     static constexpr int16_t DECALAGE_Y = 10;
 
     static constexpr uint8_t EPAISSEUR_TRAIT = 3;
@@ -45,9 +45,12 @@ class IconeMeteo
     TypeIconeMeteo convertirCode(uint8_t codeMeteo) const;
 
     void effacer();
-    void dessiner(TypeIconeMeteo type);
+
+    void dessiner(TypeIconeMeteo type, bool estJour);
+    void dessinerAstre(bool estJour);
 
     void dessinerSoleil();
+    void dessinerLune();
     void dessinerNuage();
     void dessinerPluie();
     void dessinerNeige();
@@ -57,6 +60,8 @@ class IconeMeteo
     void dessinerLigne(int16_t x1, int16_t y1, int16_t x2, int16_t y2);
 
     void dessinerCercle(int16_t x, int16_t y, int16_t rayon);
+
+    void dessinerArc(int16_t x, int16_t y, int16_t rayon, int16_t angleDebut, int16_t angleFin);
 };
 
 #endif // ICONE_METEO_H

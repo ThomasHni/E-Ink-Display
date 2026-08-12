@@ -2,6 +2,27 @@
 
 #include "Configuration.h"
 
+namespace
+{
+constexpr int16_t LARGEUR_DATE = 500;
+
+constexpr int16_t MARGE_HORIZONTALE = 20;
+constexpr int16_t MARGE_ENTETE      = 18;
+constexpr int16_t MARGE_PIED_PAGE   = 18;
+
+constexpr int16_t DECALAGE_X_INFORMATIONS_METEO = 145;
+
+constexpr int16_t DECALAGE_Y_TEMPERATURE       = -55;
+constexpr int16_t DECALAGE_Y_CONDITION         = 10;
+constexpr int16_t DECALAGE_Y_TEMPERATURES_JOUR = 50;
+
+constexpr int16_t POSITION_SEPARATEUR_HAUT = 50;
+constexpr int16_t POSITION_SEPARATEUR_BAS  = 430;
+
+constexpr int16_t LARGEUR_ECRAN        = 800;
+constexpr int16_t EPAISSEUR_SEPARATEUR = 2;
+}
+
 Accueil::Accueil() :
     labelHeure(nullptr), labelDate(nullptr), labelBatterie(nullptr), labelVersion(nullptr),
     labelTemperature(nullptr), labelCondition(nullptr), labelTemperaturesJour(nullptr)
@@ -40,13 +61,19 @@ void Accueil::creerMeteo()
     labelCondition        = lv_label_create(lv_scr_act());
     labelTemperaturesJour = lv_label_create(lv_scr_act());
 
-    lv_obj_align(labelTemperature, LV_ALIGN_CENTER, DECALAGE_X_METEO, DECALAGE_Y_TEMPERATURE);
+    lv_obj_align(labelTemperature,
+                 LV_ALIGN_CENTER,
+                 DECALAGE_X_INFORMATIONS_METEO,
+                 DECALAGE_Y_TEMPERATURE);
 
-    lv_obj_align(labelCondition, LV_ALIGN_CENTER, DECALAGE_X_METEO, DECALAGE_Y_CONDITION);
+    lv_obj_align(labelCondition,
+                 LV_ALIGN_CENTER,
+                 DECALAGE_X_INFORMATIONS_METEO,
+                 DECALAGE_Y_CONDITION);
 
     lv_obj_align(labelTemperaturesJour,
                  LV_ALIGN_CENTER,
-                 DECALAGE_X_METEO,
+                 DECALAGE_X_INFORMATIONS_METEO,
                  DECALAGE_Y_TEMPERATURES_JOUR);
 }
 
@@ -74,6 +101,12 @@ void Accueil::actualiser(const String&       heure,
 
 void Accueil::actualiserHorloge(const String& heure, const String& date)
 {
+    Serial.print("Date recue : ");
+    Serial.println(date);
+
+    Serial.print("Heure recue : ");
+    Serial.println(heure);
+
     lv_label_set_text(labelHeure, heure.c_str());
     lv_label_set_text(labelDate, date.c_str());
 }
@@ -87,11 +120,10 @@ void Accueil::actualiserBatterie(uint8_t batterie)
 
 void Accueil::actualiserMeteo(const DonneesMeteo& meteo)
 {
-    const String temperature = creerTexteTemperature(meteo);
-
+    const String temperature      = creerTexteTemperature(meteo);
     const String temperaturesJour = creerTexteTemperaturesJour(meteo);
 
-    iconeMeteo.actualiser(meteo.codeMeteo);
+    iconeMeteo.actualiser(meteo.codeMeteo, meteo.estJour);
 
     lv_label_set_text(labelTemperature, temperature.c_str());
     lv_label_set_text(labelCondition, meteo.condition.c_str());
@@ -106,6 +138,7 @@ String Accueil::creerTexteTemperature(const DonneesMeteo& meteo) const
 String Accueil::creerTexteTemperaturesJour(const DonneesMeteo& meteo) const
 {
     String texte = "Min ";
+
     texte += String(meteo.temperatureMinimale, 0);
     texte += " °C | Max ";
     texte += String(meteo.temperatureMaximale, 0);

@@ -19,12 +19,13 @@ String ClientMeteo::construireUrl() const
     url += "&longitude=";
     url += String(LONGITUDE_METEO, PRECISION_COORDONNEES);
 
-    url += "&current=temperature_2m,weather_code";
+    url += "&current=temperature_2m,weather_code,is_day";
     url += "&daily=temperature_2m_max,temperature_2m_min";
     url += "&timezone=Europe%2FParis";
 
     return url;
 }
+
 bool ClientMeteo::effectuerRequete(String& reponse)
 {
     HTTPClient clientHttp;
@@ -41,6 +42,7 @@ bool ClientMeteo::effectuerRequete(String& reponse)
     }
 
     reponse = clientHttp.getString();
+
     clientHttp.end();
 
     return true;
@@ -56,11 +58,10 @@ bool ClientMeteo::analyserReponse(const String& reponse, DonneesMeteo& donnees)
         return false;
 
     donnees.temperatureActuelle = document["current"]["temperature_2m"];
-
-    donnees.codeMeteo = document["current"]["weather_code"];
+    donnees.codeMeteo           = document["current"]["weather_code"];
+    donnees.estJour             = document["current"]["is_day"].as<uint8_t>() == INDICATEUR_JOUR;
 
     donnees.temperatureMaximale = document["daily"]["temperature_2m_max"][0];
-
     donnees.temperatureMinimale = document["daily"]["temperature_2m_min"][0];
 
     donnees.condition = convertirCondition(donnees.codeMeteo);

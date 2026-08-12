@@ -2,7 +2,7 @@
 
 #include <lvgl.h>
 
-Application::Application()
+Application::Application() : derniereActualisationMeteo(0)
 {
 }
 
@@ -24,7 +24,10 @@ void Application::initialiser()
 void Application::executer()
 {
     lv_timer_handler();
-    actualiserHorloge();
+
+    if(!actualiserMeteoPeriodiquement())
+        actualiserHorloge();
+
     delay(DELAI_BOUCLE_MS);
 }
 
@@ -63,18 +66,26 @@ void Application::initialiserHorloge()
         Serial.println("Echec de synchronisation NTP.");
 }
 
-void Application::recupererMeteo()
+void Application::initialiserAffichage()
+{
+    e1001_display_init(&piloteEcran);
+
+    accueil.creer();
+}
+
+bool Application::recupererMeteo()
 {
     Serial.println("Recuperation de la meteo...");
 
     if(!clientMeteo.recuperer(donneesMeteo))
+    {
         Serial.println("Echec de recuperation meteo.");
-}
+        return false;
+    }
 
-void Application::initialiserAffichage()
-{
-    e1001_display_init(&piloteEcran);
-    accueil.creer();
+    derniereActualisationMeteo = millis();
+
+    return true;
 }
 
 void Application::actualiserInterface()
@@ -94,9 +105,31 @@ void Application::actualiserHorloge()
     rafraichirEcran();
 }
 
+bool Application::actualiserMeteoPeriodiquement()
+{
+    if(!meteoDoitEtreActualisee())
+        return false;
+
+    if(!recupererMeteo())
+        return false;
+
+    actualiserInterface();
+    rafraichirEcran();
+
+    horloge.minuteChangee();
+
+    return true;
+}
+
+bool Application::meteoDoitEtreActualisee() const
+{
+    return millis() - derniereActualisationMeteo >= INTERVALLE_METEO_MS;
+}
+
 void Application::rafraichirEcran()
 {
     lv_timer_handler();
+
     e1001_display_refresh(&piloteEcran);
 }
 

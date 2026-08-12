@@ -11,7 +11,9 @@ struct DonneesMeteo
 
     uint8_t codeMeteo = 0;
 
+    bool estJour = true;
+
     String condition = "Indisponible";
 };
 
-#endif
+#endif // DONNEES_METEO_H
