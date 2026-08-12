@@ -104,7 +104,7 @@ La **V1.1.0** affiche une page d'accueil monochrome optimisée pour l'E-Ink avec
     - [GitHub Actions](#github-actions)
   - [Roadmap](#roadmap)
     - [v1.0.0 — Dashboard principal](#v100--dashboard-principal)
-    - [v1.1.0 — Gestion jour / nuit + preparation V2](#v110--gestion-jour--nuit--preparation-v2)
+    - [v1.1.0 — Gestion jour / nuit + préparation V2](#v110--gestion-jour--nuit--préparation-v2)
     - [v2 — Navigation et nouvelles pages](#v2--navigation-et-nouvelles-pages)
   - [Dépannage](#dépannage)
   - [Sécurité](#sécurité)
@@ -454,26 +454,26 @@ Le firmware sépare la logique métier, les services réseau, l'interface LVGL e
 
 ```mermaid
 flowchart LR
-    MAIN[main.cpp]
-    APP[Application]
+    MAIN["main.cpp"]
+    APP["Application"]
 
-    NTP[Serveur NTP]
-    API[Open-Meteo]
-    WIFI[Wi-Fi]
+    NTP["Serveur NTP"]
+    API["Open-Meteo"]
+    WIFI["Wi-Fi"]
 
-    RESEAU[Reseau]
-    HORLOGE[Horloge]
-    CLIENT[ClientMeteo]
-    DATA[DonneesMeteo]
-    BAT[Batterie]
+    RESEAU["Reseau"]
+    HORLOGE["Horloge"]
+    CLIENT["ClientMeteo"]
+    DATA["DonneesMeteo"]
+    BAT["Batterie"]
 
-    ACCUEIL[Accueil]
-    ICONE[IconeMeteo]
+    ACCUEIL["Accueil"]
+    ICONE["IconeMeteo"]
 
-    LVGL[LVGL 9.5]
-    DRIVER[e1001_display]
-    GFX[Seeed_GFX]
-    EINK[E-Ink 7,5"\n800 × 480]
+    LVGL["LVGL 9.5"]
+    DRIVER["e1001_display"]
+    GFX["Seeed_GFX"]
+    EINK["E-Ink 7,5 pouces<br/>800 × 480"]
 
     MAIN --> APP
 
@@ -634,7 +634,7 @@ Les paramètres versionnés se trouvent dans [`include/Configuration.h`](include
 Exemple :
 
 ```cpp
-constexpr char VERSION_APPLICATION[] = "v1.0.0";
+constexpr char VERSION_APPLICATION[] = "v1.1.0";
 constexpr float LATITUDE_METEO        = 43.9493F;
 constexpr float LONGITUDE_METEO       = 4.8055F;
 ```
@@ -703,6 +703,7 @@ La commande [`pio run`](https://docs.platformio.org/en/latest/core/userguide/cmd
 ```mermaid
 sequenceDiagram
     participant ESP as ESP32-S3
+    participant APP as Application
     participant BAT as Batterie
     participant WIFI as Wi-Fi
     participant NTP as NTP
@@ -710,14 +711,15 @@ sequenceDiagram
     participant UI as Accueil / LVGL
     participant EINK as E-Paper
 
-    ESP->>BAT: Initialiser la mesure ADC
-    ESP->>WIFI: Connexion au réseau
-    WIFI-->>ESP: Adresse IP
-    ESP->>NTP: Synchroniser date et heure
-    NTP-->>ESP: Temps local
-    ESP->>METEO: Requête HTTP
-    METEO-->>ESP: Réponse JSON
-    ESP->>UI: Créer et actualiser l'accueil
+    ESP->>APP: Initialiser l'application
+    APP->>BAT: Initialiser la mesure ADC
+    APP->>WIFI: Connexion au réseau
+    WIFI-->>APP: Adresse IP
+    APP->>NTP: Synchroniser date et heure
+    NTP-->>APP: Temps local
+    APP->>METEO: Requête météo
+    METEO-->>APP: Réponse JSON
+    APP->>UI: Créer et actualiser l'accueil
     UI->>EINK: Rafraîchir l'écran
 ```
 
@@ -824,7 +826,7 @@ Pour un projet PlatformIO natif, la [documentation PlatformIO sur GitHub Actions
 - [x] interface principale moderne
 - [x] version firmware
 
-### v1.1.0 — Gestion jour / nuit + preparation V2
+### v1.1.0 — Gestion jour / nuit + préparation V2
 
 - [x] récupération de `is_day` depuis Open-Meteo ;
 - [x] distinction jour / nuit ;
@@ -833,6 +835,7 @@ Pour un projet PlatformIO natif, la [documentation PlatformIO sur GitHub Actions
 - [x] variantes météo adaptées au cycle jour / nuit.
 - [x] création de `Application` pour centraliser l'orchestration ;
 - [x] allègement de `main.cpp` ;
+- [x] actualisation périodique de la météo ;
 
 ### v2 — Navigation et nouvelles pages
 
